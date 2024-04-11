@@ -1,0 +1,66 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+  }
+  
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+}
+  
+header {
+    background: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+  
+h1, h2 {
+    margin: 0;
+    padding: 0;
+}
+  
+ul {
+    list-style: none;
+    padding: 0;
+}
+/* ナビゲーション */
+.navigation {
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    text-align: center;
+    width: 100%;
+}
+
+.navigation ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-around;
+    max-width: 100%;
+}
+
+.navigation ul li {
+    flex: 1; /* Equal width for each item */
+    margin: 0 5px; /* Small gap between items */
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center; /* Center the text inside the link */
+}
+
+.navigation ul li a {
+    text-decoration: none;
+    color: #333;
+    display: block;
+    padding: 10px 20px;
+}
+
+.navigation ul li a:hover {
+    background-color: #eee;
+}

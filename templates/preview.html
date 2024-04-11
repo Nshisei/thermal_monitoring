@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %} {{ title }} {% endblock %}
+{% block content %}
+<img id="previewImage" src="{{ url_for('preview_gen') }}"> 
+
+<section class="Video-crtl">
+    <form action="{{ url_for('preview_video_ctrl') }}" method="POST">
+        <button type="submit" name="play" value="1">Play</button>
+        <button type="submit" name="play" value="0">Pause</button>
+        <button type="submit" name="skip" value="10">Skip 10s</button>
+        <button type="submit" name="skip" value="-10">Rewind 10s</button>
+        <button type="submit" name="speed" value="1">Speed +1</button>
+        <button type="submit" name="speed" value="-1">Speed -1</button>
+    </form>
+
+    <form action="{{ url_for('preview_datetimes') }}" method="POST">
+        <select id="year" name="year"></select>
+        <select id="month" name="month"></select>
+        <select id="day" name="day"></select>
+        <select id="hour" name="hour"></select>
+        <select id="minute" name="minute"></select>
+        <select id="second" name="second"></select>
+        <button type="submit" class="submit-button">Set Start Time</button>
+    </form>
+</section>
+
+{% endblock %}
+{% block script %}<script src="/static/js/preview.js"></script>{% endblock %}
