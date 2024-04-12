@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %} {{ title }} {% endblock %}
+{% block header %}<link rel="stylesheet" href="/static/css/preview.css">{% endblock %}
 {% block content %}
 <img id="previewImage" src="{{ url_for('preview_gen') }}"> 
 
@@ -15,11 +16,17 @@
 
     <form action="{{ url_for('preview_datetimes') }}" method="POST">
         <select id="year" name="year"></select>
+        <label for="year">年</label>
         <select id="month" name="month"></select>
+        <label for="month">月</label>
         <select id="day" name="day"></select>
+        <label for="day">日</label>
         <select id="hour" name="hour"></select>
+        <label for="hour">時</label>
         <select id="minute" name="minute"></select>
+        <label for="minute">分</label>
         <select id="second" name="second"></select>
+        <label for="second">秒</label>
         <button type="submit" class="submit-button">Set Start Time</button>
     </form>
 </section>

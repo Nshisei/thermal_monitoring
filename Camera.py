@@ -11,16 +11,14 @@ from PIL import Image
 ###################################################
 #動画の格納パス
 #ファイル名を時刻にするため時刻取得
-FOLODER = '/home/shisei/thermal/ssd/test3/'  #保存フォルダ指定
-RESULT_FILE = '/home/shisei/thermal/ssd/test3/result.png'
-LOGDIR = '/home/shisei/thermal/ssd/test3/logs/'
+from setting import *
 RESIZE_RETIO = 0.4
 os.makedirs(LOGDIR, exist_ok=True)
 size = (160, 120)
 
 #保存形式指定
 size = (160, 120) #画像サイズ
-logger.add("/home/shisei/thermal/ssd/test3/logs/logtest.log", rotation="1h")
+logger.add(os.path.join(LOGDIR,"logtest.log"), rotation="1h")
 
 
 class Camera(BaseCamera):           #<--２箇所目
@@ -37,17 +35,16 @@ class Camera(BaseCamera):           #<--２箇所目
             cap.release()
             return False
         
-        dt_now = datetime.datetime.now()
-        yyyymmdd = dt_now.strftime('%Y%m%d')
-        hh = dt_now.strftime('%H00')
-        file_name = dt_now.strftime('%Y%m%d-%H%M%S_%f')
-        save_dir = os.path.join(FOLODER, yyyymmdd, hh)
-        os.makedirs(save_dir, exist_ok=True)
-        output_path = os.path.join(save_dir, file_name + '.png')
-
         while True: #カメラから画像を取得してファイルに書き込むことを繰り返す
             # カメラから映像を取得
             ret, frame = cap.read() #画像の取得が成功したかどうかの結果取得(True成功/Fales失敗)
+            dt_now = datetime.datetime.now()
+            yyyymmdd = dt_now.strftime('%Y%m%d')
+            hh = dt_now.strftime('%H00')
+            file_name = dt_now.strftime('%Y%m%d-%H%M%S_%f')
+            save_dir = os.path.join(FOLODER, yyyymmdd, hh)
+            os.makedirs(save_dir, exist_ok=True)
+            output_path = os.path.join(save_dir, file_name + '.jpg')
             if ret:
                 # フレームの取得に成功したらPNG形式で保存
                 #画面サイズを指定&window表示
