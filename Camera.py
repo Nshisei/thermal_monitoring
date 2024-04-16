@@ -49,16 +49,11 @@ class Camera(BaseCamera):           #<--２箇所目
                 # フレームの取得に成功したらPNG形式で保存
                 #画面サイズを指定&window表示
                 frame = cv2.resize(frame, (size))     #保存形式指定のフレーム
-                cv2.imwrite(output_path, frame)
+                cv2.imwrite(output_path, frame, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
                 logger.info(f"SAVE {output_path}")
-                if FRAME_ID % 5 == 0:
-                    FRAME_ID = 1
-                    frame = cv2.resize(frame,(int(160 / RESIZE_RETIO),int(120 / RESIZE_RETIO)))
+                frame = cv2.resize(frame,(int(160 / RESIZE_RETIO),int(120 / RESIZE_RETIO)))
+                #ライブ配信用に画像を返す
+                yield cv2.imencode('.jpg', frame)[1].tobytes()
 
-                    #ライブ配信用に画像を返す
-                    yield cv2.imencode('.jpg', frame)[1].tobytes()
-
-                else:
-                    FRAME_ID += 1
             else:
                 logger.error(f"Fail {output_path}")

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, Response, request
-from Thermal_Camera import Camera
+from Camera import Camera
 from setting import *
 import cv2
 import numpy as np
 from glob import glob
 import os
 import time
+import numpy as np
 
 app = Flask(__name__)
 
@@ -20,7 +21,27 @@ def convert_raw2rgb(frame):
     frame = cv2.resize(frame,(640, 480))
     frame = cv2.applyColorMap(frame, cv2.COLORMAP_INFERNO)
     return frame
-    
+
+def view_datetimes(img,datetime):
+    COLOR = np.array([(0.000, 0.447, 0.741)])
+    color = (COLOR * 255).astype(np.uint8).tolist()
+    text = f'{datetime[:4]}/{datetime[4:6]}/{datetime[6:8]} {datetime[9:11]}:{datetime[11:13]}:{datetime[13:15]}' 
+    txt_color = (0, 0, 0) if np.mean(COLOR) > 0.5 else (255, 255, 255)
+    font = cv2.FONT_HERSHEY_SIMPLEX
+
+    txt_size = cv2.getTextSize(text, font, 0.7, 1)[0]
+
+    txt_bk_color = (COLOR * 255 * 0.7).astype(np.uint8).tolist()
+        
+    # cv2.rectangle(
+    #     img,
+    #     (0, 0),
+    #     (0 + txt_size[0], 0 + int(1.5*txt_size[1])),
+    #     txt_bk_color,
+    #     -1,
+    #     )
+    cv2.putText(img, text, (0, 0 + txt_size[1]), font, 0.7, txt_color, thickness=1)
+    return img
 
 # previewを見るための機能
 NEXT_FRAME_IDX = 0
@@ -31,14 +52,15 @@ SPEED = 1
 def generate_images():
     global NEXT_FRAME_IDX, IMAGES, PLAY, SPEED
     # start_timeに基づいて画像ファイルをソートして取得
-    interval = max(1.0 / SPEED, 0.1)  # 再生速度に応じたインターバル（最小0.1秒）
-    print('generate_images',NEXT_FRAME_IDX, SPEED, PLAY, len(IMAGES))
+    # interval = (1.0 / SPEED)  # 再生速度に応じたインターバル（最小0.1秒）
+    print('IDX',NEXT_FRAME_IDX, 'SPEED',SPEED,'PLAY', PLAY, 'DATA N',len(IMAGES))
     # 指定されたインデックスから画像を読み込む
     while NEXT_FRAME_IDX < len(IMAGES):
-        print(NEXT_FRAME_IDX, SPEED, PLAY)
+        print('IDX',NEXT_FRAME_IDX, 'SPEED',SPEED,'PLAY', PLAY, 'DATA N',len(IMAGES))
         image_path = IMAGES[NEXT_FRAME_IDX]
         frame = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
-        frame = convert_raw2rgb(frame)
+        frame = cv2.resize(frame,(640, 480))
+        frame = view_datetimes(frame,os.path.basename(image_path))
         ret, jpeg = cv2.imencode('.jpg', frame)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n')
@@ -72,11 +94,13 @@ def preview_datetimes():
             yyyymmdd = year + month + day
             hh = hour + '00'
             print(file_name)
-            IMAGES = sorted(glob(os.path.join(FOLODER, yyyymmdd) + '/*/*.png'))
+            IMAGES = sorted(glob(os.path.join(FOLODER, yyyymmdd) + '/*/*.jpg'))
         for idx, file in enumerate(IMAGES):
             if file_name in file:
                 NEXT_FRAME_IDX = idx
                 break
+
+        print('IDX',NEXT_FRAME_IDX, 'SPEED',SPEED,'PLAY', PLAY, 'DATA N',len(IMAGES))
     return render_template('preview.html')
 
 @app.route('/preview_video_ctrl', methods=['POST'])
@@ -94,11 +118,11 @@ def preview_video_ctrl():
             NEXT_FRAME_IDX += int(skip_seconds * FPS)
          
         # 倍速再生があればその処理
-        speed = int(request.form.get('speed', '1'))
-        if speed != 1:
-            SPEED -= speed
+        speed = int(request.form.get('speed', '0'))
+        if speed != 0:
+            SPEED += speed
             NEXT_FRAME_IDX += SPEED
-        print(NEXT_FRAME_IDX, SPEED, PLAY, len(IMAGES))
+        print('NEXT_FRAME_IDX',NEXT_FRAME_IDX,'SPPED',SPEED, 'PLAY',PLAY,'DATA N', len(IMAGES))
     return render_template('preview.html')
 
 #カメラ映像を配信する
@@ -126,4 +150,5 @@ def gen(camera):
 if __name__ == '__main__':
     threaded=True
     video()
+    # ip address を入力
     app.run(host="192.168.0.101",port=8888)

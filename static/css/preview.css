@@ -1,0 +1,84 @@
+/* Base settings for body, inherited from the provided CSS */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+}
+
+header {
+    background: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Style adjustments for the forms and control section */
+.Video-crtl {
+    background-color: #f0f0f0;
+    border-top: 1px solid #ddd;
+    padding: 20px;
+    text-align: center;
+}
+
+.Video-crtl form {
+    margin: 10px 0;
+}
+
+.Video-crtl select,
+.Video-crtl button {
+    padding: 10px;
+    margin-right: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: white;
+}
+
+.Video-crtl button {
+    cursor: pointer;
+    background-color: #e2e2e2;
+    color: #333;
+}
+
+.Video-crtl button:hover {
+    background-color: #d4d4d4;
+}
+
+/* Ensures that buttons and select elements look good together */
+.Video-crtl button,
+.Video-crtl select {
+    vertical-align: middle;
+}
+
+/* Extra styling for the dropdown elements */
+.Video-crtl select {
+    min-width: 100px; /* Ensures that dropdowns are not too narrow */
+}
+
+/* Style for the submit button in the form */
+.submit-button {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    border: none; /* No border */
+}
+
+.submit-button:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+
+/* Footer style if needed */
+footer {
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 10px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
