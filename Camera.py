@@ -51,7 +51,7 @@ class Camera(BaseCamera):           #<--２箇所目
                 frame = cv2.resize(frame, (size))     #保存形式指定のフレーム
                 cv2.imwrite(output_path, frame, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
                 logger.info(f"SAVE {output_path}")
-                frame = cv2.resize(frame,(int(160 / RESIZE_RETIO),int(120 / RESIZE_RETIO)))
+                frame = cv2.resize(frame,(640,480))
                 #ライブ配信用に画像を返す
                 yield cv2.imencode('.jpg', frame)[1].tobytes()
 

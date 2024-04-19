@@ -32,14 +32,7 @@ def view_datetimes(img,datetime):
     txt_size = cv2.getTextSize(text, font, 0.7, 1)[0]
 
     txt_bk_color = (COLOR * 255 * 0.7).astype(np.uint8).tolist()
-        
-    # cv2.rectangle(
-    #     img,
-    #     (0, 0),
-    #     (0 + txt_size[0], 0 + int(1.5*txt_size[1])),
-    #     txt_bk_color,
-    #     -1,
-    #     )
+
     cv2.putText(img, text, (0, 0 + txt_size[1]), font, 0.7, txt_color, thickness=1)
     return img
 
