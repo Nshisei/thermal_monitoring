@@ -1,5 +1,5 @@
 function checkServer() {
-    serverUrl="http://192.168.0.101:8888/heartbeat", //ハートビートエンドポイント
+    serverUrl="http://192.168.1.60:8888/heartbeat", //ハートビートエンドポイント
     fetch(serverUrl)
         .then(response => {
             if (response.ok) {

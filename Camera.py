@@ -14,39 +14,15 @@ from PIL import Image
 #動画の格納パス
 #ファイル名を時刻にするため時刻取得
 from setting import *
-RESIZE_RETIO = 0.4
 os.makedirs(LOGDIR, exist_ok=True)
 size = (160, 120)
 from copy import deepcopy
 #保存形式指定
 size = (160, 120) #画像サイズ
 logger.add(os.path.join(LOGDIR,"logtest.log"), rotation="1h")
-FOLDER = "./images"
-FOLDER = "./ssd_mount/lab/image3"
-def save_img(frame,camera_id):
-    # 現在の日時をベースにファイル名を生成
-    filename_base = datetime.now().strftime("%Y%m%d-%H%M%S")
-    path = os.path.join(FOLDER, filename_base + f"-{camera_id}.png")
-    cv2.imwrite(path, frame)
-    print("[NOTE] Save file: {}".format(path))
-from cv2 import aruco
-# Charucoボードのマス数
-dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
-squares_x = 10  # 縦方向のマス数
-squares_y = 7   # 横方向のマス数
-grid_size = 0.022  # マスのサイズ（22mm）
-marker_size = 0.015  # マーカーサイズ（15mm）
-board = aruco.CharucoBoard((squares_x, squares_y), grid_size, marker_size, dictionary)
-def detect_aruco(frame):
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    cornersl, idsl, _ = aruco.detectMarkers(gray, dictionary)
-    if idsl is not None:
-        frame_aruco = aruco.drawDetectedMarkers(deepcopy(frame), cornersl, idsl)
-        return frame_aruco
-    else:
-        return frame
 
-class Camera(BaseCamera):           #<--２箇所目
+
+class Camera(BaseCamera):
     ###################################################
     ## カメラ処理のメインメソッド
     ###################################################
@@ -70,20 +46,17 @@ class Camera(BaseCamera):           #<--２箇所目
             output_path = os.path.join(FOLDER, "camera0", file_name + '-thermo.png')
             os.makedirs(os.path.join(FOLDER, "camera0"), exist_ok=True)
             if ret:
-                # フレームの取得に成功したらPNG形式で保存
-                #画面サイズを指定&window表示
                 cv2.imwrite(output_path, frame)
                 frame = cv2.resize(frame, (size))     #保存形式指定のフレーム
                 cv2.imwrite(output_path, frame, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
-                # logger.info(f"SAVE {output_path}")
                 frame = cv2.resize(frame,(640,480))
                 #ライブ配信用に画像を返す
-                yield cv2.imencode('.jpg', frame)[1].tobytes()
+                yield frame
 
             else:
                 logger.error(f"Fail {output_path}")
 
-class DepthCameraRGB(BaseCamera):           #<--２箇所目
+class DepthCameraRGB(BaseCamera):
     ###################################################
     ## カメラ処理のメインメソッド
     ###################################################
@@ -93,22 +66,16 @@ class DepthCameraRGB(BaseCamera):           #<--２箇所目
         cfg  = rs.config()
 
         cfg.enable_stream(rs.stream.color, 640,480, rs.format.bgr8, 30)
-        # cfg.enable_stream(rs.stream.depth, 640,480, rs.format.z16, 30)
         pipe.start(cfg)
         while True: #カメラから画像を取得してファイルに書き込むことを繰り返す
             # カメラから映像を取得
             frame = pipe.wait_for_frames()
-            # depth_frame = frame.get_depth_frame()
             color_frame = frame.get_color_frame()
-            # depth_image = np.asanyarray(depth_frame.get_data())
             color_image = np.asanyarray(color_frame.get_data())
-            # # 深度画像を0〜255にスケーリング
-            # depth_image_normalized = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
-            # depth_image = cv2.cvtColor(depth_image_normalized,cv2.COLOR_GRAY2RGB)
-            yield cv2.imencode('.jpg', color_image)[1].tobytes()
+            yield color_image
 
 
-class DepthCamera(BaseCamera):           #<--２箇所目
+class DepthCamera(BaseCamera):
     ###################################################
     ## カメラ処理のメインメソッド
     ###################################################
@@ -116,18 +83,14 @@ class DepthCamera(BaseCamera):           #<--２箇所目
     def frames():
         pipe = rs.pipeline()
         cfg  = rs.config()
-
-        #cfg.enable_stream(rs.stream.color, 640,480, rs.format.bgr8, 30)
         cfg.enable_stream(rs.stream.depth, 640,480, rs.format.z16, 30)
         pipe.start(cfg)
         while True: #カメラから画像を取得してファイルに書き込むことを繰り返す
             # カメラから映像を取得
             frame = pipe.wait_for_frames()
             depth_frame = frame.get_depth_frame()
-            #color_frame = frame.get_color_frame()
             depth_image = np.asanyarray(depth_frame.get_data())
-            #color_image = np.asanyarray(color_frame.get_data())
             # 深度画像を0〜255にスケーリング
             depth_image_normalized = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
             depth_image = cv2.cvtColor(depth_image_normalized,cv2.COLOR_GRAY2RGB)
-            yield cv2.imencode('.jpg', depth_image)[1].tobytes()
+            yield depth_image

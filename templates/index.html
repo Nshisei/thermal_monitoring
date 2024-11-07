@@ -1,7 +1,27 @@
 {% extends "base.html" %}
 {% block title %} {{ title }} {% endblock %}
+{% block header %}<link rel="stylesheet" href="/static/css/index.css">{% endblock %}
 {% block content %}
-<img src="{{ url_for('video') }}">
-<img src="{{ url_for('video_1') }}">
-<img src="{{ url_for('video_2') }}">
+<header>
+    <h1>Recording App</h1>
+</header>
+<div class="container">
+    <div class="status-container">
+        <div class="status" id="recording-status">Stopped</div>
+        <button class="button" onclick="toggleRecording()">Start Recording</button>
+    </div>
+    <div class="video-container">
+        <!-- 動画ストリームを配置 -->
+        <div class="video">
+            <img src="{{ url_for('video') }}" alt="Thermal Camera Feed">
+        </div>
+        <div class="video">
+            <img src="{{ url_for('video_1') }}" alt="Depth Camera Feed">
+        </div>
+        <div class="video">
+            <img src="{{ url_for('video_2') }}" alt="RGB Camera Feed">
+        </div>
+    </div>
+</div>
 {% endblock %}
+{% block script %}<script src="/static/js/index.js"></script>{% endblock %}

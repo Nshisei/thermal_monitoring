@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, Response, request
+from flask import Flask, render_template, Response, request, jsonify
 from Camera import *
 from setting import *
 import cv2
@@ -41,6 +41,7 @@ NEXT_FRAME_IDX = 0
 IMAGES = []
 PLAY = 0
 SPEED = 1
+IS_RECORDING = False
 
 def generate_images():
     global NEXT_FRAME_IDX, IMAGES, PLAY, SPEED
@@ -131,28 +132,49 @@ def video():
     print('video')
     # camera = DepthCamera()
     camera = Camera()
-    return Response(gen(camera),
+    return Response(gen(camera, "thermo"),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/video_1')
 def video_1():
     print('video')
     camera1 = DepthCamera()
-    return Response(gen(camera1),
+    return Response(gen(camera1, "depth"),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/video_2')
 def video_2():
     print('video')
     camera2 = DepthCameraRGB()
-    return Response(gen(camera2),
+    return Response(gen(camera2, "rgb"),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/toggle_recording', methods=['POST'])
+def toggle_recording():
+    global IS_RECORDING
+    IS_RECORDING = not IS_RECORDING
+    print('NOW RECORDING IS', IS_RECORDING)
+    return jsonify(is_recording=IS_RECORDING), 200
+
+def save_img(frame, camera_name):
+    global IS_RECORDING
+    if IS_RECORDING:
+        # 現在の日時をベースにファイル名を生成
+        dt_now = datetime.datetime.now()
+        yyyymmdd = dt_now.strftime('%Y%m%d')
+        hh = dt_now.strftime('%H00')
+        filename_base = dt_now.strftime('%Y%m%d-%H%M%S_%f')
+        path = os.path.join(FOLDER, camera_name, yyyymmdd, hh, filename_base + f"-{camera_name}.png")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        cv2.imwrite(path, frame)
+        print("[NOTE] Save file: {}".format(path))
 
 #カメラオブジェクトから静止画を取得する
-def gen(camera):
+def gen(camera, camera_name=""):
     while True:
         frame = camera.get_frame()
+        save_img(frame, camera_name)
+        frame = cv2.imencode('.jpg', frame)[1].tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
@@ -167,4 +189,4 @@ if __name__ == '__main__':
     video_1()
     video_2()
     # ip address を入力
-    app.run(host="192.168.1.60",port=8888)
+    app.run(host=IP_ADDR, port=8888)
