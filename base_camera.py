@@ -29,7 +29,7 @@ class CameraEvent(object):
     def set(self):
         """Invoked by the camera thread when a new frame is available."""
         now = time.time()
-        remove = None
+        remove = []
         for ident, event in self.events.items():
             if not event[0].isSet():
                 # if this client's event is not set, then set it
@@ -42,63 +42,56 @@ class CameraEvent(object):
                 # if the event stays set for more than 5 seconds, then assume
                 # the client is gone and remove it
                 if now - event[1] > 5:
-                    remove = ident
-        if remove:
-            del self.events[remove]
+                    remove.append(ident)
+
+        for ident in remove:        
+            del self.events[ident]
 
     def clear(self):
         """Invoked from each client's thread after a frame was processed."""
         self.events[get_ident()][0].clear()
 
-
-class BaseCamera(object):
-    thread = None  # background thread that reads frames from camera
-    frame = None  # current frame is stored here by background thread
-    last_access = 0  # time of last client access to the camera
-    event = CameraEvent()
+class BaseCamera:
+    """カメラの基本クラス。各サブクラスは独自のクラス変数を持ちます。"""
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.thread = None
+        cls.frame = None
+        cls.last_access = 0
+        cls.event = CameraEvent()
 
     def __init__(self):
-        """Start the background camera thread if it isn't running yet."""
-        if BaseCamera.thread is None:
-            BaseCamera.last_access = time.time()
-
-            # start background frame thread
-            BaseCamera.thread = threading.Thread(target=self._thread)
-            BaseCamera.thread.daemon = True
-            BaseCamera.thread.start()
-
-            # wait until first frame is available
-            BaseCamera.event.wait()
+        """バックグラウンドのカメラスレッドを開始します。"""
+        if self.__class__.thread is None:
+            self.__class__.last_access = time.time()
+            self.__class__.thread = threading.Thread(target=self._thread)
+            self.__class__.thread.daemon = True
+            self.__class__.thread.start()
+            self.__class__.event.wait()
 
     def get_frame(self):
-        """Return the current camera frame."""
-        BaseCamera.last_access = time.time()
-
-        # wait for a signal from the camera thread
-        BaseCamera.event.wait()
-        BaseCamera.event.clear()
-
-        return BaseCamera.frame
+        """現在のカメラフレームを返します。"""
+        self.__class__.last_access = time.time()
+        self.__class__.event.wait()
+        self.__class__.event.clear()
+        return self.__class__.frame
 
     @staticmethod
     def frames():
-        """"Generator that returns frames from the camera."""
-        raise RuntimeError('Must be implemented by subclasses.')
+        """カメラからフレームを返すジェネレータ。サブクラスで実装が必要です。"""
+        raise NotImplementedError('サブクラスで実装してください。')
 
     @classmethod
     def _thread(cls):
-        """Camera background thread."""
-        print('Starting camera thread.')
+        """カメラのバックグラウンドスレッド。"""
+        print(f'{cls.__name__} スレッドを開始します。')
         frames_iterator = cls.frames()
         for frame in frames_iterator:
-            BaseCamera.frame = frame
-            BaseCamera.event.set()  # send signal to clients
+            cls.frame = frame
+            cls.event.set()
             time.sleep(0)
-
-            # if there hasn't been any clients asking for frames in
-            # the last 10 seconds then stop the thread
-            # if time.time() - BaseCamera.last_access > 10:
-            #     frames_iterator.close()
-            #     print('Stopping camera thread due to inactivity.')
-            #     break
-        # BaseCamera.thread = None
+            if time.time() - cls.last_access > 10:
+                frames_iterator.close()
+                print(f'{cls.__name__} スレッドを停止します。')
+                break
+        cls.thread = None
