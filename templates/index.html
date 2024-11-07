@@ -1,3 +1,7 @@
 {% extends "base.html" %}
 {% block title %} {{ title }} {% endblock %}
-{% block content %} <img src="{{ url_for('video') }}"> {% endblock %}
+{% block content %}
+<img src="{{ url_for('video') }}">
+<img src="{{ url_for('video_1') }}">
+<img src="{{ url_for('video_2') }}">
+{% endblock %}

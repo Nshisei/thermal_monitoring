@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, Response, request
-from Camera import Camera
+from Camera import *
 from setting import *
 import cv2
 import numpy as np
@@ -129,8 +129,25 @@ def preview_gen():
 @app.route('/video')
 def video():
     print('video')
-    return Response(gen(Camera()),
+    # camera = DepthCamera()
+    camera = Camera()
+    return Response(gen(camera),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/video_1')
+def video_1():
+    print('video')
+    camera1 = DepthCamera()
+    return Response(gen(camera1),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/video_2')
+def video_2():
+    print('video')
+    camera2 = DepthCameraRGB()
+    return Response(gen(camera2),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 #カメラオブジェクトから静止画を取得する
 def gen(camera):
@@ -146,6 +163,8 @@ def heartbeat():
 #カメラスレッドを生成してFlaskを起動する
 if __name__ == '__main__':
     threaded=True
-    video()
+    # video()
+    video_1()
+    video_2()
     # ip address を入力
-    app.run(host="192.168.0.101",port=8888)
+    app.run(host="192.168.1.60",port=8888)
