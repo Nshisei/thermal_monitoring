@@ -16,40 +16,28 @@ class CameraEvent(object):
     def __init__(self):
         self.events = {}
 
-    def wait(self):
-        """Invoked from each client's thread to wait for the next frame."""
-        ident = get_ident()
+    def wait(self, timeout=5):
+        ident = threading.get_ident()
         if ident not in self.events:
-            # this is a new client
-            # add an entry for it in the self.events dict
-            # each entry has two elements, a threading.Event() and a timestamp
             self.events[ident] = [threading.Event(), time.time()]
-        return self.events[ident][0].wait()
+        return self.events[ident][0].wait(timeout)
 
     def set(self):
-        """Invoked by the camera thread when a new frame is available."""
         now = time.time()
         remove = []
         for ident, event in self.events.items():
-            if not event[0].isSet():
-                # if this client's event is not set, then set it
-                # also update the last set timestamp to now
+            if not event[0].is_set():
                 event[0].set()
                 event[1] = now
-            else:
-                # if the client's event is already set, it means the client
-                # did not process a previous frame
-                # if the event stays set for more than 5 seconds, then assume
-                # the client is gone and remove it
-                if now - event[1] > 5:
-                    remove.append(ident)
+            elif now - event[1] > 5:
+                remove.append(ident)
 
-        for ident in remove:        
+        for ident in remove:
             del self.events[ident]
 
     def clear(self):
-        """Invoked from each client's thread after a frame was processed."""
-        self.events[get_ident()][0].clear()
+        self.events[threading.get_ident()][0].clear()
+
 
 class BaseCamera:
     """カメラの基本クラス。各サブクラスは独自のクラス変数を持ちます。"""
@@ -90,8 +78,8 @@ class BaseCamera:
             cls.frame = frame
             cls.event.set()
             time.sleep(0)
-            if time.time() - cls.last_access > 10:
-                frames_iterator.close()
-                print(f'{cls.__name__} スレッドを停止します。')
-                break
+            # if time.time() - cls.last_access > 10:
+            #     frames_iterator.close()
+            #     print(f'{cls.__name__} スレッドを停止します。')
+            #     break
         cls.thread = None

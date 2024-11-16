@@ -1,6 +1,7 @@
-FOLDER = "./images/"  #'/home/shisei/thermal_monitoring/ssd/mokamezon_0417/'  #保存フォルダ指定
-LOGDIR ="./logs" # '/home/shisei/thermal_monitoring/ssd/mokamezon_0417/logs/'
-# FOLODER = '/home/shisei/thermal/ssd/test1/'  #保存フォルダ指定
-# LOGDIR = '/home/shisei/thermal/ssd/test1/logs/'
-IP_ADDR = "192.168.1.60" 
+IP_ADDR = "192.168.0.181" 
 FPS = 9
+
+SAVE_DATA_STEM = "/home/srv-admin/monitoring/data/"
+LIDAR_CAMERA_POS_TXT = "/home/srv-admin/monitoring/lidar_position.txt"
+LIDAR_VIS_MAX_POINTS = 100000
+LIDAR_VIS_INTERVAL = 1000

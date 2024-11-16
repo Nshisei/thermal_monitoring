@@ -4,22 +4,15 @@ import numpy as np
 import sys          #変数&関数
 import datetime     #時刻
 import os           #FILE&directory
-from loguru import logger
 import time
 from base_camera import * 
-from PIL import Image
 ###################################################
 ## 定数定義
 ###################################################
 #動画の格納パス
 #ファイル名を時刻にするため時刻取得
 from setting import *
-os.makedirs(LOGDIR, exist_ok=True)
-size = (160, 120)
-from copy import deepcopy
-#保存形式指定
-size = (160, 120) #画像サイズ
-logger.add(os.path.join(LOGDIR,"logtest.log"), rotation="1h")
+
 
 
 class Camera(BaseCamera):
@@ -32,29 +25,18 @@ class Camera(BaseCamera):
         cap = cv2.VideoCapture(0) #wseb camera
         FRAME_ID = 0
         if not cap.isOpened():
-            logger.error("Webカメラが開けませんでした。")
+            print("Webカメラが開けませんでした。")
             cap.release()
             return False
         
         while True: #カメラから画像を取得してファイルに書き込むことを繰り返す
             # カメラから映像を取得
             ret, frame = cap.read() #画像の取得が成功したかどうかの結果取得(True成功/Fales失敗)
-            dt_now = datetime.datetime.now()
-            yyyymmdd = dt_now.strftime('%Y%m%d')
-            hh = dt_now.strftime('%H00')
-            file_name = dt_now.strftime('%Y%m%d-%H%M%S_%f')
-            output_path = os.path.join(FOLDER, "camera0", file_name + '-thermo.png')
-            os.makedirs(os.path.join(FOLDER, "camera0"), exist_ok=True)
             if ret:
-                cv2.imwrite(output_path, frame)
-                frame = cv2.resize(frame, (size))     #保存形式指定のフレーム
-                cv2.imwrite(output_path, frame, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
                 frame = cv2.resize(frame,(640,480))
                 #ライブ配信用に画像を返す
                 yield frame
 
-            else:
-                logger.error(f"Fail {output_path}")
 
 class DepthCameraRGB(BaseCamera):
     ###################################################
@@ -94,3 +76,45 @@ class DepthCamera(BaseCamera):
             depth_image_normalized = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
             depth_image = cv2.cvtColor(depth_image_normalized,cv2.COLOR_GRAY2RGB)
             yield depth_image
+
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+class PNGHandler(FileSystemEventHandler):
+    def __init__(self):
+        super().__init__() 
+        self.latest_image = None
+        self.frame_available = False
+
+    def on_created(self, event):
+        # 新しく作成されたファイルがPNGかどうかを確認
+        print(event.src_path)
+        if event.src_path.endswith(".png"):
+            print(f"New PNG detected: {event.src_path}")
+            frame = cv2.imread(event.src_path)
+            if frame is not None:
+                self.latest_image = frame
+                self.frame_available = True
+
+
+class Lidarmid70(BaseCamera):
+    @staticmethod
+    def frames():
+        # 保存ディレクトリの存在確認
+        LIDAR_SAVE_DIR = os.path.join(SAVE_DATA_STEM, "Lidar", "png")  # 保存ディレクトリを指定
+        os.makedirs(LIDAR_SAVE_DIR, exist_ok=True)
+        handler = PNGHandler()
+        observer = Observer()
+        observer.schedule(handler, LIDAR_SAVE_DIR, recursive=True)
+        observer.start()
+        print("Lidar observe")
+        try:
+            while True:
+                if handler.frame_available:
+                    yield handler.latest_image
+                    handler.frame_available = False
+        except KeyboardInterrupt:
+            print("Stopped monitoring.")
+        finally:
+            observer.stop()
+            observer.join()
+

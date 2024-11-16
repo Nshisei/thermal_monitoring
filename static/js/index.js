@@ -1,5 +1,5 @@
 function toggleRecording() {
-    const serverUrl = "http://192.168.1.60:8888/toggle_recording";
+    const serverUrl = "http://192.168.0.181:8888/toggle_recording";
     fetch(serverUrl, { method: 'POST' })
         .then(response => {
             if (!response.ok) {
