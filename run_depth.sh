@@ -20,6 +20,8 @@ elif [ "$1" == "stop" ]; then
     # プログラム停止
 
     PROCESS_NAME="/home/srv-admin/anaconda3/envs/depth-ai/bin/python3 depthai_demo.py --noSupervisor --guiType qt"
+    #for test env
+    # PROCESS_NAME="/home/srv-admin/anaconda3/envs/test/bin/python3 depthai_demo.py --noSupervisor --guiType qt"
 
     # プロセスのPIDを取得
     PIDS=$(ps aux | grep "$PROCESS_NAME" | grep -v "grep" | awk '{print $2}')

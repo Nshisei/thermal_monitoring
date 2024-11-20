@@ -32,15 +32,12 @@ Confirm ```python --version``` returns Python 3.9.0
 <span style="color: red;">From here, run on a conda environment.</span>
 
 ```
-(depth-ai)
-cd depthai
-python install_requirements.py
+python -m pip install -r reqirements.txt
 ```
 
 
 ## Livox-SDK
 ```
-(depth-ai)
 cd Livox-SDK
 cd build && cmake ..
 make
@@ -51,8 +48,7 @@ sudo make install
 
 ### Permmision
 ```
-(depth-ai)
 sudo chmod +x ./run_lidar.sh
-./run_lidar.sh
+sudo chmod +x ./run_depth.sh
 ```
 
