@@ -18,8 +18,9 @@ sudo mkdir /tmp
 cd /tmp
 curl -O https://repo.anaconda.com/archive/Anaconda3-2020.02-Linux-x86_64.sh
 bash Anaconda3-2020.02-Linux-x86_64.sh
-echo "source ~/anaconda3/etc/profile.d/conda.sh" >> ~/.zshrc
-source .zshrc
+cd ~
+echo "source ~/anaconda3/etc/profile.d/conda.sh" >> ~/.bashrc
+source .bashrc
 ```
 
 ### create virtural environment
@@ -27,14 +28,16 @@ source .zshrc
 conda create -n depth-ai python=3.9
 conda activate depth-ai
 ```
-Confirm ```python --version``` returns Python 3.9.0
+Confirm ```python --version``` returns Python 3.9
 
 
 ## depthai
 <span style="color: red;">From here, run on a conda environment.</span>
 
 ```
-python -m pip install -r reqirements.txt
+git clone --recursive https://github.com/Nshisei/thermal_monitoring.git -b monitoring
+cd thermal_monitoring
+python -m pip install -r requirements.txt
 ```
 
 
@@ -93,7 +96,7 @@ rm -rf *.csv
 ```
   1-2. determining viewer point
 ```
-./save_camera_position ./
+./save_camera_pos ./
 -> if decided close window
 -> then made "camera_position.txt"
 ```
@@ -109,7 +112,14 @@ Change setting.py line 6
 LIDAR_CAMERA_POS_TXT = "/home/srv-admin/monitoring/lidar_position.txt"
 ``` 
 
-3. if you want to change other parameters
-```
+3. if you want to change other parameters (e.g. save data path, lidar sampling interval...)
+change setting.py
 
+## run camera_server.py
 ```
+cd ./monitoring
+python3 camera_server.py
+-> move to displayed IP ADDR
+```
+before clicking "Start Recordng" you can't see "Lidar" and "OAK-D Depth"
+because these images display after capturing and saving images 

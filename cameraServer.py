@@ -196,7 +196,7 @@ def heartbeat():
 #カメラスレッドを生成してFlaskを起動する
 if __name__ == '__main__':
     threaded=True
-    thremal_wide()
+    # thremal_wide()
     thermal()
     realsense()
     realsense_rgb()

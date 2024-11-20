@@ -22,7 +22,7 @@ class Camera(BaseCamera):
     @staticmethod
     def frames():
         print("camera_id", 0)
-        cap = cv2.VideoCapture(6) #wseb camera
+        cap = cv2.VideoCapture(0) #wseb camera
         FRAME_ID = 0
         if not cap.isOpened():
             print("Webカメラが開けませんでした。")
@@ -43,8 +43,8 @@ class Camera2(BaseCamera):
     ###################################################
     @staticmethod
     def frames():
-        print("camera_id", 0)
-        cap = cv2.VideoCapture(8) #wseb camera
+        print("camera_id", 6)
+        cap = cv2.VideoCapture(6) #wseb camera
         FRAME_ID = 0
         if not cap.isOpened():
             print("Webカメラが開けませんでした。")
