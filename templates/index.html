@@ -13,17 +13,23 @@
     <div class="video-container">
         <!-- 動画ストリームを配置 -->
         <div class="video">
-            <!-- <img src="{{ url_for('video') }}" alt="Thermal Camera Feed">
+            <img src="{{ url_for('thremal_wide') }}" alt="Thermal Camera Feed">
         </div>
         <div class="video">
-            <img src="{{ url_for('video_1') }}" alt="Depth Camera Feed">
+            <img src="{{ url_for('thermal') }}" alt="Thermal Camera Feed">
         </div>
         <div class="video">
-            <img src="{{ url_for('video_2') }}" alt="RGB Camera Feed">
-        </div> -->
-        <div class="video">
-            <img src="{{ url_for('video_3') }}" alt="Lidar Camera Feed">
+            <img src="{{ url_for('realsense') }}" alt="Depth Camera Feed">
         </div>
+        <div class="video">
+            <img src="{{ url_for('realsense_rgb') }}" alt="RGB Camera Feed">
+        </div> 
+        <div class="video">
+            <img src="{{ url_for('lidar') }}" alt="Lidar Camera Feed">
+        </div> 
+        <div class="video">
+            <img src="{{ url_for('oakdepth') }}" alt="OAK-D PRO Camera Feed">
+        </div> 
     </div>
 </div>
 {% endblock %}

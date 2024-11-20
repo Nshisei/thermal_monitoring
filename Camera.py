@@ -22,7 +22,29 @@ class Camera(BaseCamera):
     @staticmethod
     def frames():
         print("camera_id", 0)
-        cap = cv2.VideoCapture(0) #wseb camera
+        cap = cv2.VideoCapture(6) #wseb camera
+        FRAME_ID = 0
+        if not cap.isOpened():
+            print("Webカメラが開けませんでした。")
+            cap.release()
+            return False
+        
+        while True: #カメラから画像を取得してファイルに書き込むことを繰り返す
+            # カメラから映像を取得
+            ret, frame = cap.read() #画像の取得が成功したかどうかの結果取得(True成功/Fales失敗)
+            if ret:
+                frame = cv2.resize(frame,(640,480))
+                #ライブ配信用に画像を返す
+                yield frame
+
+class Camera2(BaseCamera):
+    ###################################################
+    ## カメラ処理のメインメソッド
+    ###################################################
+    @staticmethod
+    def frames():
+        print("camera_id", 0)
+        cap = cv2.VideoCapture(8) #wseb camera
         FRAME_ID = 0
         if not cap.isOpened():
             print("Webカメラが開けませんでした。")
@@ -61,18 +83,29 @@ class DepthCamera(BaseCamera):
     ###################################################
     ## カメラ処理のメインメソッド
     ###################################################
+    
+
     @staticmethod
     def frames():
         pipe = rs.pipeline()
         cfg  = rs.config()
         cfg.enable_stream(rs.stream.depth, 640,480, rs.format.z16, 30)
         pipe.start(cfg)
+        def save_depth_raw(depth_image):
+            dt_now = datetime.datetime.now()
+            yyyymmdd = dt_now.strftime('%Y%m%d')
+            hh = dt_now.strftime('%H00')
+            filename_base = dt_now.strftime('%Y%m%d-%H%M%S_%f')
+            depthraw_path = os.path.join(SAVE_DATA_STEM, "realsense_depth", yyyymmdd, hh, filename_base + f"-realsense_depth.npy")
+            os.makedirs(os.path.dirname(depthraw_path), exist_ok=True)
+            np.save(depthraw_path, depth_image)
         while True: #カメラから画像を取得してファイルに書き込むことを繰り返す
             # カメラから映像を取得
             frame = pipe.wait_for_frames()
             depth_frame = frame.get_depth_frame()
             depth_image = np.asanyarray(depth_frame.get_data())
             # 深度画像を0〜255にスケーリング
+            save_depth_raw(depth_image)
             depth_image_normalized = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
             depth_image = cv2.cvtColor(depth_image_normalized,cv2.COLOR_GRAY2RGB)
             yield depth_image
@@ -96,6 +129,28 @@ class PNGHandler(FileSystemEventHandler):
                 self.frame_available = True
 
 
+class OAKDPRO(BaseCamera):
+    @staticmethod
+    def frames():
+        # 保存ディレクトリの存在確認
+        OAK_SAVE_DIR = os.path.join(SAVE_DATA_STEM, "depth")  # 保存ディレクトリを指定
+        os.makedirs(OAK_SAVE_DIR, exist_ok=True)
+        handler = PNGHandler()
+        observer = Observer()
+        observer.schedule(handler, OAK_SAVE_DIR, recursive=True)
+        observer.start()
+        print("OAK-D PRO observe")
+        try:
+            while True:
+                if handler.frame_available:
+                    yield handler.latest_image
+                    handler.frame_available = False
+        except KeyboardInterrupt:
+            print("Stopped OAK-D PRO monitoring.")
+        finally:
+            observer.stop()
+            observer.join()
+
 class Lidarmid70(BaseCamera):
     @staticmethod
     def frames():
@@ -113,7 +168,7 @@ class Lidarmid70(BaseCamera):
                     yield handler.latest_image
                     handler.frame_available = False
         except KeyboardInterrupt:
-            print("Stopped monitoring.")
+            print("Stopped Lidar monitoring.")
         finally:
             observer.stop()
             observer.join()
