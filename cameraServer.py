@@ -98,7 +98,7 @@ def stop_depth():
 #index.htmlを返す
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', SAVE_PATH=SAVE_DATA_STEM)
 
 
 #カメラ映像を配信する
@@ -133,7 +133,6 @@ def realsense_rgb():
     return Response(gen(camera, "realsense_rgb"),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
 @app.route('/lidar')
 def lidar():
     print('lidar')
@@ -147,16 +146,17 @@ def oakdepth():
     camera = OAKDPRO()
     return Response(gen(camera, "OAK-D"),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
 @app.route('/toggle_recording', methods=['POST'])
 def toggle_recording():
     global IS_RECORDING
     print('NOW RECORDING IS', IS_RECORDING)
     if IS_RECORDING:
-        # stop_lidar()
+        stop_lidar()
         stop_depth()
     else:
-        # start_lidar(LIDAR_CAMERA_POS_TXT, SAVE_DATA_STEM,
-        #              LIDAR_VIS_MAX_POINTS, LIDAR_VIS_INTERVAL)
+        start_lidar(LIDAR_CAMERA_POS_TXT, SAVE_DATA_STEM,
+                     LIDAR_VIS_MAX_POINTS, LIDAR_VIS_INTERVAL)
         start_depth()    
     IS_RECORDING = not IS_RECORDING
     print('CHANGE TO ', IS_RECORDING)
@@ -175,6 +175,7 @@ def save_img(frame, camera_name):
         os.makedirs(os.path.dirname(path), exist_ok=True)
         cv2.imwrite(path, frame)
         print("[NOTE] Save file: {}".format(path))
+
 from detect_charuco import detectmarkers
 #カメラオブジェクトから静止画を取得する
 def gen(camera, camera_name=""):
@@ -196,10 +197,11 @@ def heartbeat():
 #カメラスレッドを生成してFlaskを起動する
 if __name__ == '__main__':
     threaded=True
-    # thremal_wide()
-    thermal()
+    thremal_wide()
+    # thermal()
     realsense()
     realsense_rgb()
+    lidar()
     oakdepth()
     # ip address を入力
     app.run(host=IP_ADDR, port=8888)
