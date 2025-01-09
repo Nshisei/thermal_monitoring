@@ -21,8 +21,8 @@ class Camera(BaseCamera):
     ###################################################
     @staticmethod
     def frames():
-        print("camera_id", 0)
-        cap = cv2.VideoCapture(0) #wseb camera
+        print("camera_id", THREMAL_CAMERA_WIDE_ID)
+        cap = cv2.VideoCapture(THREMAL_CAMERA_WIDE_ID) #wseb camera
         FRAME_ID = 0
         if not cap.isOpened():
             print("Webカメラが開けませんでした。")
@@ -43,8 +43,8 @@ class Camera2(BaseCamera):
     ###################################################
     @staticmethod
     def frames():
-        print("camera_id", 6)
-        cap = cv2.VideoCapture(6) #wseb camera
+        print("camera_id", THREMAL_CAMERA_ID)
+        cap = cv2.VideoCapture(THREMAL_CAMERA_ID) #wseb camera
         FRAME_ID = 0
         if not cap.isOpened():
             print("Webカメラが開けませんでした。")
@@ -133,7 +133,7 @@ class OAKDPRO(BaseCamera):
     @staticmethod
     def frames():
         # 保存ディレクトリの存在確認
-        OAK_SAVE_DIR = os.path.join(SAVE_DATA_STEM, "depth")  # 保存ディレクトリを指定
+        OAK_SAVE_DIR = os.path.join(SAVE_DATA_STEM, "OAK-D", "depth")  # 保存ディレクトリを指定
         os.makedirs(OAK_SAVE_DIR, exist_ok=True)
         handler = PNGHandler()
         observer = Observer()

@@ -10,23 +10,29 @@
         <div class="status" id="recording-status">Stopped</div>
         <button class="button" onclick="toggleRecording()">Start Recording</button>
     </div>
+    <h1>save path {{ SAVE_PATH }}</h1>
     <div class="video-container">
         <!-- 動画ストリームを配置 -->
-        <!-- <div class="video">
+        <div class="video">
             <img src="{{ url_for('thremal_wide') }}" alt="Thermal Camera Feed">
-        </div> -->
+        </div>
+        <!-- <div><h2>Thermal<br></h2></div>
         <div class="video">
             <img src="{{ url_for('thermal') }}" alt="Thermal Camera Feed">
-        </div>
+        </div> -->
+        <h2>Realsense Depth<br></h2>
         <div class="video">
             <img src="{{ url_for('realsense') }}" alt="Depth Camera Feed">
         </div>
+        <h2>realsense RGB<br></h2> 
         <div class="video">
             <img src="{{ url_for('realsense_rgb') }}" alt="RGB Camera Feed">
         </div> 
+        <h2>Lidar<br></h2> 
         <div class="video">
             <img src="{{ url_for('lidar') }}" alt="Lidar Camera Feed">
         </div> 
+        <h2>OAK-D PRO<br></h2> 
         <div class="video">
             <img src="{{ url_for('oakdepth') }}" alt="OAK-D PRO Camera Feed">
         </div> 

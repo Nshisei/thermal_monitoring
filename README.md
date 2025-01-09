@@ -60,7 +60,7 @@ sudo chmod +x ./run_depth.sh
 # How to use
 ## Prepare devices
 ### Thremal or other camera devices
-1. Check Thermal device number
+1. サーマルカメラのデバイス番号を確認する
 ```
 v4l2-ctl --list-devices
 ```
@@ -79,7 +79,7 @@ PureThermal (fw:v1.3.0): PureTh (usb-0000:00:14.0-7):
         /dev/video7
 
 ```
-2. Change "Camera.py" line 25
+2. "Camera.py" line 25 を変更する
 ```
 def frames():
     print("camera_id", 0)
@@ -88,17 +88,17 @@ def frames():
 
 ### Lidar
 1. Setting viewer potision
-  1-1. sampling point cloud in 5s -> create csv files 
+  1-1. 点群を5秒間サンプリングする -> 複数のcsvが生成される 
 ```
 cd ./Livox-SDK/build/sample_cc/point_cloud
 rm -rf *.csv
 ./sampling
 ```
-  1-2. determining viewer point
+  1-2. png画像として保存するカメラ位置を決定する
 ```
 ./save_camera_pos ./
--> if decided close window
--> then made "camera_position.txt"
+# -> マウスでカメラ位置を調整. 位置が決まったらウィンドウを×ボタンで閉じる 
+# -> "camera_position.txt" が生成される
 ```
    1-3. run screen_shot to check camera position
    if you alter position, back to 1-2
@@ -106,20 +106,22 @@ rm -rf *.csv
 ./screen_shot ./
 ``` 
 
-2. reflect camera position to setting.py
+2. カメラ位置をsetting.py に反映させる
 Change setting.py line 6
 ```
 LIDAR_CAMERA_POS_TXT = "/home/srv-admin/monitoring/lidar_position.txt"
 ``` 
 
-3. if you want to change other parameters (e.g. save data path, lidar sampling interval...)
+3. 設定項目をいじりたいときはsetting.pyを変える (e.g. save data path, lidar sampling interval...)
 change setting.py
 
-## run camera_server.py
+## モニタリングシステムの実行
 ```
 cd ./monitoring
 python3 camera_server.py
 -> move to displayed IP ADDR
 ```
-before clicking "Start Recordng" you can't see "Lidar" and "OAK-D Depth"
-because these images display after capturing and saving images 
+"Start Recordng" をクリックする前は "Lidar" and "OAK-D Depth"の画像は映りません
+(Lidar と OAK-D Depthは別プログラムrun_depth.sh, run_lidar.shを実行して生成されたpngを表示するようにしているため)
+
+停止時は"Stop Recording"を押す. ただし、OAK-D Depthはすぐには止まらないのでしばらくまつ
