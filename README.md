@@ -64,7 +64,7 @@ sudo chmod +x ./run_depth.sh
 ```
 v4l2-ctl --list-devices
 ```
-In this case, 6
+以下の場合, 6番
 ```
 Intel(R) RealSense(TM) Depth Ca (usb-0000:00:14.0-5):
         /dev/video0
@@ -79,20 +79,18 @@ PureThermal (fw:v1.3.0): PureTh (usb-0000:00:14.0-7):
         /dev/video7
 
 ```
-2. "Camera.py" line 25 を変更する
+2. settings.pyの line 10を変更
 ```
-def frames():
-    print("camera_id", 0)
-    cap = cv2.VideoCapture(6) # change caputure device number
+THREMAL_CAMERA_WIDE_ID = 6
 ```
 
 ### Lidar
-1. Setting viewer potision
+1. Lidar画像のカメラポジションを決定する
   1-1. 点群を5秒間サンプリングする -> 複数のcsvが生成される 
 ```
 cd ./Livox-SDK/build/sample_cc/point_cloud
-rm -rf *.csv
-./sampling
+rm -rf *.csv  # フォルダ内に点群csvが残っているとうまくいかないのでいったん削除
+./sampling    # 5秒間のcsvファイルが複数作成される
 ```
   1-2. png画像として保存するカメラ位置を決定する
 ```
@@ -100,20 +98,31 @@ rm -rf *.csv
 # -> マウスでカメラ位置を調整. 位置が決まったらウィンドウを×ボタンで閉じる 
 # -> "camera_position.txt" が生成される
 ```
-   1-3. run screen_shot to check camera position
-   if you alter position, back to 1-2
+   1-3. うまく画像が生成できるかテスト (うまくいかなければ1-2に戻る)
 ```
 ./screen_shot ./
 ``` 
 
-2. カメラ位置をsetting.py に反映させる
-Change setting.py line 6
+2. setting.py line 6 を書き換えてカメラ位置を反映させる (初期設定では生成されたカメラ位置が記録されたtxtファイル)
 ```
-LIDAR_CAMERA_POS_TXT = "/home/srv-admin/monitoring/lidar_position.txt"
+LIDAR_CAMERA_POS_TXT = "/home/srv-admin/monitoring/Livox-SDK/build/sample_cc/point_cloud/camera_position.txt"
 ``` 
 
-3. 設定項目をいじりたいときはsetting.pyを変える (e.g. save data path, lidar sampling interval...)
-change setting.py
+3. その他設定項目をいじりたいときはsetting.pyを変える
+```
+IP_ADDR = "192.168.0.181" # flaskのサーバーのアドレス
+# IP_ADDR = "127.0.0.1"  
+FPS = 9 # 使わない
+
+SAVE_DATA_STEM = "/home/srv-admin/monitoring/ssd/test/" # 生成されたデータを保存するパス. その中に様々なデータが保存される 
+LIDAR_CAMERA_POS_TXT = "/home/srv-admin/monitoring/Livox-SDK/build/sample_cc/point_cloud/camera_position.txt" # 点群画像を生成する際のカメラ位置を記録したテキストファイルの絶対パス
+LIDAR_VIS_MAX_POINTS = 100000 # 点群画像を生成する際過去何回分のサンプリングを画像に含めるか. 多いほど点群の数は増えるが、昔の点も残ってしまう
+LIDAR_VIS_INTERVAL = 1000 # Lidarが点群をサンプリングした時に何回サンプリングした後、画像を生成するかの頻度. ただし単位は(回)であるため特定の時間と対応しているわけではない
+THREMAL_CAMERA_ID = 6 # その他usbカメラの番号. 追加したい場合はindex.htmlもいじって描画されるように変更する必要がある
+THREMAL_CAMERA_WIDE_ID = 6 # PureThermal のusb番号
+SAVE_FPS = 1 # OAK-D PRO のサンプリングFPS (1以外でやると画像の生成スピードと描画が追い付かなくなる)
+```
+
 
 ## モニタリングシステムの実行
 ```
@@ -125,3 +134,19 @@ python3 camera_server.py
 (Lidar と OAK-D Depthは別プログラムrun_depth.sh, run_lidar.shを実行して生成されたpngを表示するようにしているため)
 
 停止時は"Stop Recording"を押す. ただし、OAK-D Depthはすぐには止まらないのでしばらくまつ
+
+## 生成されたファイルの内役
+```
+.
+├── Lidar
+│   ├── csv # Lidar の点群CSVファイル (ファイル名はUNIX時間)
+│   └── png # Lidar のスクリーンショット画像 (ファイル名はUNIX時間)
+├── OAK-D
+│   ├── bbox # OAK-D PRO 物体検出結果(csv)
+│   ├── color # OAK-D PRO のRGB画像
+│   ├── depth # OAK-D PRO のDepth (カラー画像)
+│   └── depthRaw # OAK-D PRO のDepth (.npy)
+├── realsense_depth # RealSenseのDepth (.npy)
+├── realsense_rgb # RealSenseのRGB画像
+└── thermo_wide   # PureThermal
+```
